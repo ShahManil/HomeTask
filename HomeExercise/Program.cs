@@ -16,18 +16,20 @@ namespace HomeExercise
         {
             SqlCommand cmd = new SqlCommand("getAllUsers", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            SqlDataReader data = cmd.ExecuteReader();
-            int fields = data.FieldCount;
-            while (data.Read())
+            using (SqlDataReader data = cmd.ExecuteReader())
             {
-                for (int i = 0; i < fields; i++)
+                int fields = data.FieldCount;
+                while (data.Read())
                 {
-                    Console.Write("{0} : {1}\t", data.GetName(i), data[data.GetName(i)]);
+                    for (int i = 0; i < fields; i++)
+                    {
+                        Console.Write("{0} : {1}\t", data.GetName(i), data[data.GetName(i)]);
+                    }
+                    Console.Write("\n");
+                    //Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\n", data["first_name"], data["last_name"], data["age"], data["gender"], data["phone_no"], data["email"]);
                 }
-                Console.Write("\n");
-                //Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\n", data["first_name"], data["last_name"], data["age"], data["gender"], data["phone_no"], data["email"]);
             }
-            data.Close();
+            //data.Close();
         }
 
         public static void updateUser(SqlConnection conn, int empId, string new_name, string new_surname, int new_age, char new_gender, string new_no, string new_email, string up_pass)
@@ -69,17 +71,19 @@ namespace HomeExercise
             SqlCommand getOne = new SqlCommand("getEmpById", conn);
             getOne.CommandType = CommandType.StoredProcedure;
             getOne.Parameters.AddWithValue("@emp_id", id);
-            SqlDataReader oneData = getOne.ExecuteReader();
-            int fields = oneData.FieldCount;
-            while (oneData.Read())
+            using (SqlDataReader oneData = getOne.ExecuteReader())
             {
-                for (int i = 0; i < fields; i++)
+                int fields = oneData.FieldCount;
+                while (oneData.Read())
                 {
-                    Console.Write("{0} : {1}\t", oneData.GetName(i), oneData[oneData.GetName(i)]);
+                    for (int i = 0; i < fields; i++)
+                    {
+                        Console.Write("{0} : {1}\t", oneData.GetName(i), oneData[oneData.GetName(i)]);
+                    }
+                    Console.Write("\n");
                 }
-                Console.Write("\n");
             }
-            oneData.Close();
+            //oneData.Close();
         }
 
         public static void updatePass(SqlConnection conn, int id, string new_pass)
@@ -106,17 +110,20 @@ namespace HomeExercise
             bool auth = false;
             SqlCommand cmd = new SqlCommand("select role, password from permissions where emp_id = @emp_id", conn);
             cmd.Parameters.AddWithValue("@emp_id", emp_id);
-            SqlDataReader rd = cmd.ExecuteReader();
-            string role="";
-            while(rd.Read())
+            string role = "";
+
+            using (SqlDataReader rd = cmd.ExecuteReader())
             {
-                if (password == Convert.ToString(rd["password"]))
+                while(rd.Read())
                 {
-                    auth = true;
+                    if (password == Convert.ToString(rd["password"]))
+                    {
+                        auth = true;
+                    }
+                    role = Convert.ToString(rd["role"]);
                 }
-                role = Convert.ToString(rd["role"]);
             }
-            rd.Close();
+            //rd.Close();
 
             return new Credential { autorised = auth, role = role };
         }
@@ -169,21 +176,23 @@ namespace HomeExercise
 
                             case 2:
                                 Console.WriteLine();
-                                Console.Write("Enter the ID of the Employee you wanat to edit : ");
+                                Console.Write("Enter the ID of the Employee you want to edit : ");
                                 int empId = Convert.ToInt32(Console.ReadLine());
                                 bool idFound = false;
 
                                 SqlCommand cmd = new SqlCommand("select id from users", conn);
-                                SqlDataReader data = cmd.ExecuteReader();
-                                int fields = data.FieldCount;
-                                while (data.Read())
+                                using (SqlDataReader data = cmd.ExecuteReader())
                                 {
-                                    if (empId == Convert.ToInt32(data["id"]))
+                                    int fields = data.FieldCount;
+                                    while (data.Read())
                                     {
-                                        idFound = true;
+                                        if (empId == Convert.ToInt32(data["id"]))
+                                        {
+                                            idFound = true;
+                                        }
                                     }
                                 }
-                                data.Close();
+                                //data.Close();
                                 if (idFound)
                                 {
                                     Console.Write("Enter New Name : ");
@@ -260,7 +269,7 @@ namespace HomeExercise
                         Console.WriteLine("1) View Details");
                         Console.WriteLine("2) Change Password");
                         Console.WriteLine("0) Quite");
-                        Console.Write("Enter Your Choice (1 or 2) : ");
+                        Console.Write("Enter Your Choice (1, 2 Or 0) : ");
                         choice = Convert.ToInt32(Console.ReadLine());
                         switch(choice)
                         {
