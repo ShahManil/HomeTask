@@ -1,0 +1,96 @@
+4 Common Class
+	1) Connection, 2) Command, 3) DataReader, 4) DataAdapter
+	System.Data.SqlClient
+	
+Connection :
+	string cs = "Data Source=ServerName; Initial Catalog=DatabaseName; Integrated Security=true";
+	SqlConnection con = new SqlConnection(cs);
+	con.open();
+	Check state property to check whether the connection is opened or not con.State == ConnectionState.open
+	con.close();
+	
+	-------------------------------------------------------------------------------------
+	Ideal Way for connection String :
+		in .config :
+			<ConnectionStrings>
+				<add name="dbcs" connectionString="" providerName="System.Data.SqlClient">
+			</ConnectionStrings>
+		in prog. :
+			add ref of System.Configuration
+			using System.Configuration;
+			string cs = ConfigurationManager.connectionStrings["dbcs"].ConnectionString
+			
+Command :
+	IN System.Data.SqlClient.SqlCommand
+	SqlCommand(string cmdText, SqlConnection con); (Commonly used)
+	SqlCommand(string cmdText, SqlConnection con, SqlTransaction transaction);
+	
+	------------------------------------------------------------
+	Methods :
+		ExecuteReader(); -> Select Query 
+		ExecuteNonQuery(); -> insert, update, delet
+		ExecuteScalar(); -> aggregate function
+	
+		
+	SqlCommand cmd = new SqlCommand(query, con);
+	con.open();
+	SqlDataReader dr = cmd.ExecuteReader();
+	while(dr.Read()) {
+		c.w(dr["column_name"]);
+	}
+	------------------------------------------------------------
+	
+	------------------------------------------------------------
+	Properties :
+		When we use empty constructor of the SqlCommand();
+		1) CommandText
+		2) Connection
+	
+		3) CommandType
+		If we pass Stored Procedure name insted of the query to the SqlCommand
+		cmd.CommandType = CommandType.StoredProcedure
+	------------------------------------------------------------
+	
+	
+	
+	=============================================================================
+	=> ExecuteNonQuery : 
+		string query = "insert into table values (@name, @gender)";
+		SqlCommand cmd = new SqlCommand(query, con);
+		cmd.Parameter.AddWithValue("@name", name);
+		cmd.Parameter.AddWithValue("@gender", gender);
+		int res = cmd.ExecuteNonQuery();
+	=============================================================================
+	
+	=============================================================================
+	=> ExecuteScalar : (For aggregate function)
+		int a = (int)cmd.ExecuteScalar();
+	=============================================================================
+	
+SqlDataReader (Connected Data Access):
+	Read-only and forward-only, can't create the instance with the new keyword
+	Properties :
+		FieldCount, HasRows, IsClosed, Item[string]
+	Methods :
+		Read(), GetName(int), NextResult()
+		
+SqlDataAdapter (Dis-Connected Data Access):
+	No need to open and close the connection
+	In System.Data
+	-------------------------------------------------------------------
+	DataSet : Store table and relationship
+	DataTable : Only One Table
+		
+	it is dataprovider independant
+	/*Store in Server*/
+	
+	SqlDataAdapter sda = new SqlDataAdapter("select * from table_name", con);
+	DataSet ds = new DataSet();
+	sda.Fill(ds);
+	foreach(DataRow row in ds.Tables[0].Rows) {
+		c.w(row);
+	}
+		
+Bootstrap Suggetion : 
+	<form class="d-grd">
+	<input type="submit" value="SUBMIT" class="btn btn-outline-primary btn-block">
