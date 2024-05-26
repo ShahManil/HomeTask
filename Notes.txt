@@ -1,0 +1,126 @@
+Middleware :
+	We can use with either app.Run(Context), or app.Use(Context, next);
+	in app.Run it will not execute the middleware after that coz it is not having next.
+	
+Rendering View :
+	builder.Services.AddControllersWithViews();
+	app.MapControllers();
+	[Route("[controller]/[action]")]
+	
+Get, Post methods
+	app.UseRouting();
+	//=========== Creating EndPoint =========
+	app.UseEndpoints(endpoints =>
+	{
+		endpoints.MapGet("/getDemo", async (context) =>
+		{
+			await context.Response.WriteAsync("Demo Successfull");
+		});
+	});
+	//============ Default Page =============
+	app.Run(async (HttpContext context) =>
+	{
+		await context.Response.WriteAsync("Page Not Found");
+	});
+	
+Layout File :
+	Common view of the project
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	
+View Start : 
+	Should be in the Views Filder
+	@{
+		Layout = "_Layout"
+	}
+	//This will add the _Layout File in all the Views File
+	
+Send Data from controller to view :
+	We can access ViewData with ViewBag.Key and Vice-a-Versa
+	ViewData and ViewBag exists only for the current req. and becomes null in next req.
+	1) ViewData : 
+		// Can pass any type of the data including array, Collection, Object
+		// Type-cast the complex datatype
+		In controller : ViewData["Key"] = value;
+		In View : @ViewData["Key"];
+	2) ViewBag :
+		//<PropertyName> mustbe in string but without ""
+		// Not required to use typecast the complex datatype like ViewData coz it determines runtime
+		ViewBag.<PropertyName> = <Value>
+	3) TempData :
+		// Only One time access is allowed if we want to keep that use TempData.Keep()
+		// Can access outside the action method also
+		TempData["Key"] = value
+	4) Strongly typed Views :
+		pass object in the return View(obj);
+		In View : 
+			add : @model ModelName;
+				if list of object : @model IEnnumerable<ModelName>
+			access : with @Model.Key;
+
+_ViewImports.cshtml : 
+	add model it will be accessible in all the views
+	@using ModelName;
+	
+TagHelpers :
+	To execute html elements in server side
+	// this change automatic if we cange convention of the routing
+	@ Html.ActionLink("Edit page", "Controller", "Action", new { id = 1});
+	<a href = "Url.Action("Controller", "Action", new { id = 1})">Edit Page</a>
+	
+	// TagHelper
+	<a asp-controller="Home" asp-action="Edit" asp-route-id="1">Edit Page</a>
+
+	//Image TagHelpper
+	asp-append-version = "true" // if path is changed then download from the server else get from the browser cache
+
+	// Form TagHelper
+	asp-action, asp-controller,
+	
+	// create dropdown
+	asp-items="Html.GetEnumSelectList<Gender>()"
+
+Model Validation :
+	In System.ComponentModel.DataAnnotation
+	<span asp-validation-for="Name"></span>
+	<div asp-validation-summary></div> //It will display in unorder list
+	
+	Required, StrindLength(15, MinimumLength = 3), EmailAddress(Not Suggested use Regex insted), Range(min, max, ErrorMessagge),
+	RegularExpression("RegexCode", ErrorMessage), Compare("Field", ErrorMessage=""), Url(ErrorMessage=""), 
+	MaxLength(15) // Will not let you type more then 15 Character, MinLength(3, ErrorMessage="")
+	
+	// Can put multipal validation
+	in Model => [Required(ErrorMessage = "Custome Message")]
+	in Post => if(ModelState.IsValid) { ModelState.Clear } // Clear the error message else { .. }
+	
+ORM (Object Relational Mapping) :
+	To address the data access requirment 
+	   
+Entity framework core :
+	2 Approaches : 1) Code-First(Most Common), 2) Database-First (Suggested)
+	Guidline : 
+		Create Model Class -> DbContext Class -> Create Migration -> Run Migration = Database Tables
+	Steps : 
+		(1) Install 3 Packages : 1) Microsoft EntityFrameworkCore.SqlServer //Design time logic
+							2) Microsoft EntityFrameworkCore.Tools //For Migrations
+							3) Microsoft EntityFrameworkCore.Design //
+		(2) Create Model Class, DbContext Class(In Models) :
+			(i) Model Class:
+				[Key] //Make Primary Key
+				[Column("ColumnName", TypeName="varchar(20)")]
+			(ii) DbContext:
+				DbContextClass : DbContext {
+					Constructor(DbContextOptions options) : base(options) { }
+					public DbSet<student> Students {} //Students will be the name of the table in database
+				}
+			(iii) Connection String : 
+				in appsettings.json
+				-------------------
+				ConnectionStrings {
+					"dbcs": "server=...;Database=DatabaseName;Trusted_Connection=True;"
+				}
+			(iv) Register Connection String in Program.cs :
+				Before Builder.builde
+				---------------------
+				var provider = builder.Services.BuildServices\Provider();
+	
+Server Name : DESKTOP-8D8TGL4\SQLEXPRESS
